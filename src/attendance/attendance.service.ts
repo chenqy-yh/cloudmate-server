@@ -16,7 +16,7 @@ const STATUS_OFF = 1;
 
 const MILLSEC_IN_DAY = 24 * 60 * 60 * 1000;
 
-const PUNCH_CENTER_ADDRESS = '天津市中国民航大学北校区';
+const PUNCH_CENTER_ADDRESS = '天津市中国民航大学北校区教二十五楼';
 
 @Injectable()
 export class AttendanceService {
