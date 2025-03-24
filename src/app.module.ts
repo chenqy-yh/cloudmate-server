@@ -1,30 +1,35 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
-import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { AttendanceModule } from './attendance/attendance.module';
-import { ConfigModule } from '@nestjs/config';
-import { LocationModule } from './location/location.module';
+import { AttendanceModule } from './modules/attendance/attendance.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { LocationModule } from './modules/location/location.module';
+import { MessageModule } from './modules/message/message.module';
+import { RedisMoudle } from './modules/redis/redis.module';
+import { UserModule } from './modules/user/user.module';
+import { DatabaseModule } from './modules/database/database.module';
+import { COSModule } from './modules/cos/cos.module';
+import { ShareModule } from './modules/share/share.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'yinhan',
-      database: "cloudmate",
-      entities: [User],
-      synchronize: true,
-      autoLoadEntities: true
-    }), UserModule, AuthModule, AttendanceModule, LocationModule],
+    ConfigModule.forRoot({ isGlobal: true }),
+    DatabaseModule,
+    UserModule,
+    AuthModule,
+    AttendanceModule,
+    LocationModule,
+    RedisMoudle,
+    ChatModule,
+    MessageModule,
+    COSModule,
+    ShareModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

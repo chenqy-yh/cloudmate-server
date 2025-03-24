@@ -1,9 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Attendance } from 'src/entity/attendance.entity';
-import { LocationService } from 'src/location/location.service';
-import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
+import { LocationService } from 'src/modules/location/location.service';
+import { UserService } from 'src/modules/user/user.service';
 
 
 // 上班打卡时间分界线
@@ -21,11 +20,19 @@ const PUNCH_CENTER_ADDRESS = '天津市中国民航大学北校区教二十五�
 @Injectable()
 export class AttendanceService {
 
-    constructor(
-        @InjectRepository(Attendance) private readonly atdRepo: Repository<Attendance>,
-        private readonly userService: UserService,
-        private readonly locationService: LocationService,
-    ) { }
+    @InjectRepository(Attendance, 'postgresConnection')
+    private readonly atdRepo;
+
+    // constructor(
+    //     @InjectRepository(Attendance, 'postgresConnection')
+    //     private readonly atdRepo
+    // ) { }
+
+    @Inject()
+    private readonly userService: UserService;
+
+    @Inject()
+    private readonly locationService: LocationService;
 
     /**
      * @description 获取当前天数
@@ -46,6 +53,10 @@ export class AttendanceService {
 
     async punch(payload: UserPayload, lat: number, lng: number) {
         const user = await this.userService.findUserByPayload(payload);
+        if (!user) {
+            throw new BadRequestException('用户不存在');
+        }
+
         // 查询当天是否已经打卡
         const day = this.getCurrentDayNumber();
         const sign_in_type = this.getAttendanceType();
@@ -58,7 +69,13 @@ export class AttendanceService {
         }
 
         // 查询打卡位置
-        const locationInfo = await this.locationService.reverseGeocoding(lat, lng);
+        let locationInfo;
+        try {
+            locationInfo = await this.locationService.reverseGeocoding(lat, lng);
+        } catch (error) {
+            throw new BadRequestException('位置信息获取失败');
+        }
+
         if (locationInfo.status !== 200 || locationInfo.data.status !== 0) {
             throw new BadRequestException('位置信息获取失败');
         }
@@ -71,10 +88,7 @@ export class AttendanceService {
         }
 
         const distance = this.locationService.calcDistance(centerLocation.location, { type: 'Point', coordinates: [lng, lat] });
-
         const inMaxDistance = distance <= centerLocation.max_distance;
-
-        console.log('distance', distance, 'inMaxDistance', inMaxDistance);
 
         if (!inMaxDistance) {
             throw new BadRequestException('不在打卡范围内');

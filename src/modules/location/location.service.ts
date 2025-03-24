@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
@@ -8,12 +8,19 @@ import { Point, Repository } from 'typeorm';
 
 @Injectable()
 export class LocationService {
+
+    @Inject()
+    private readonly httpService: HttpService;
+
+    @InjectRepository(Location, 'postgresConnection')
+    private readonly locationRepo: Repository<Location>;
+
     private tencentMapKey: string;
+
+
 
     constructor(
         private readonly configService: ConfigService,
-        private readonly httpService: HttpService,
-        @InjectRepository(Location) private readonly locationRepo: Repository<Location>
     ) {
         this.tencentMapKey = this.configService.get<string>('TENCENT_MAP_KEY') ?? '';
         if (!this.tencentMapKey) {
@@ -64,8 +71,6 @@ export class LocationService {
     }
 
     getLocationByAddress(address: string) {
-        console.log('address', address);
-
         return this.locationRepo.findOne({ where: { address } });
     }
 

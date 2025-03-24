@@ -6,7 +6,7 @@ import { User } from 'src/entity/user.entity';
 
 @Global()
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User], 'postgresConnection')],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService]

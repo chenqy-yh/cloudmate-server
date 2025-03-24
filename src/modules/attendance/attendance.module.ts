@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Attendance } from 'src/entity/attendance.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Attendance])],
+  imports: [TypeOrmModule.forFeature([Attendance],'postgresConnection')],
   controllers: [AttendanceController],
   providers: [AttendanceService]
 })

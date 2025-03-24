@@ -19,7 +19,7 @@ export class Location {
     @Column({ type: 'text', nullable: true })
     description: string;  // 描述该地方的附加信息
 
-    @Column({ type: 'int', default: 500 })
+    @Column({ type: 'int', default: 20 })
     max_distance: number;  // 最大距离
 
     @CreateDateColumn()

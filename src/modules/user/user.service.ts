@@ -1,19 +1,30 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entity/user.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
 
-    constructor(@InjectRepository(User) private userRepo: Repository<User>) { }
+    @InjectRepository(User, 'postgresConnection')
+    private readonly userRepo: Repository<User>;
 
+    // constructor(
+    //     @InjectRepository(User, 'userConnection')
+    //     private readonly userRepo: Repository<User>
+    // ) { }
 
-    async findAll() {
-        return await this.userRepo.find();
+    async findAll(uuid: string) {
+        return await this.userRepo.find({
+            where: {
+                uuid: Not(uuid)
+            },
+            select: ['uuid', 'email', 'phone', 'name']
+        });
+
     }
 
-    async findUserByPhone(phone: string) {
+    async findUserByPhone(phone: string): Promise<User> {
         try {
             const user = await this.userRepo.findOne({
                 where: { phone }
@@ -42,5 +53,7 @@ export class UserService {
             throw new HttpException('服务器异常', 500);
         }
     }
+
+
 
 }

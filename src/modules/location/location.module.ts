@@ -8,7 +8,7 @@ import { Location } from 'src/entity/location.entity';
 
 @Global()
 @Module({
-  imports: [ConfigModule, HttpModule, TypeOrmModule.forFeature([Location])],
+  imports: [ConfigModule, HttpModule, TypeOrmModule.forFeature([Location], 'postgresConnection')],
   controllers: [LocationController],
   providers: [LocationService],
   exports: [LocationService]
